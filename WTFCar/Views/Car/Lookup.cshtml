@@ -1,0 +1,879 @@
+﻿
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
+<script type="text/javascript" src="/Scripts/chartjs-plugin-style.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.css" />
+
+
+<style>
+
+    #h3DiscussionForum {
+        background-image: url("/images/speech-bubble-small.png") !important;
+        background-repeat: no-repeat;
+        padding: 4px;
+        background-size: 28px 28px !important;
+        background-repeat: no-repeat !important;
+        background-position-y: center !important;
+    }
+
+    #h3DiscussionForum {
+        background-image: url("/images/speech-bubble-small.png") !important;
+        background-repeat: no-repeat;
+        padding: 4px;
+        background-size: 28px 28px !important;
+        background-repeat: no-repeat !important;
+        background-position-y: center !important;
+    }
+
+    .glyphicon-refresh-animate {
+        -animation: spin .7s infinite linear;
+        -webkit-animation: spin2 .7s infinite linear;
+    }
+
+    @@-webkit-keyframes spin2 {
+        from {
+            -webkit-transform: rotate(0deg);
+        }
+
+        to {
+            -webkit-transform: rotate(360deg);
+        }
+    }
+
+    @@keyframes spin {
+        from {
+            transform: scale(1) rotate(0deg);
+        }
+
+        to {
+            transform: scale(1) rotate(360deg);
+        }
+    }
+
+    .wordcloud {
+        border: 1px solid #036;
+        height: 500px;
+        margin: 0.2in auto;
+        padding: 0;
+        page-break-after: always;
+        page-break-inside: avoid;
+        width: 700px;
+    }
+
+    .clickable {
+        cursor: pointer;
+    }
+
+    .panel-heading span {
+        margin-top: -20px;
+        font-size: 15px;
+    }
+</style>
+
+<script type="text/javascript">
+    var jqxhr = jQuery.ajax("http://techgration.ddns.net:8080/WTFCar/api/data")
+        .done(function (data) {
+            jQuery.each(data, function (i, val) {
+                jQuery(".year").append("<option>" + val + "</option>");
+            });
+        })
+        .fail(function () {
+            alert("error");
+        })
+        .always(function () {
+            //alert( "complete" );
+        });
+    function changeMake(y) {
+        jQuery("#make").removeAttr('disabled');
+        jQuery("#model").removeAttr('disabled');
+        jQuery("#make").empty();
+        jQuery("#make").append("<option>Loading...</option>");
+        jQuery("#model").empty();
+        jQuery("#model").append("<option>Loading...</option>");
+        jQuery("#make").attr('disabled', 'disabled');
+        jQuery("#model").attr('disabled', 'disabled');
+        var jqxhr = jQuery.ajax(
+            "/Car/GetMakesByYear/" + jQuery(".year").val())
+            .done(function (data) {
+                jQuery("#make").removeAttr('disabled');
+                jQuery("#model").removeAttr('disabled');
+                jQuery("#make").empty();
+                jQuery("#model").empty();
+                jQuery("#model").append("<option>[Select Make]</option>");
+                jQuery("#make").append("<option>Select Make</option>");
+                jQuery("#model").attr('disabled', 'disabled');
+                jQuery.each(data, function (i, val) {
+                    jQuery("#make").append("<option value='" + val + "'>" + val + "</option>");
+                });
+            })
+            .fail(function () {
+                alert("error");
+            })
+            .always(function () {
+                //alert( "complete" );
+            });
+    }
+    function changeModel(m) {
+        jQuery("#model").removeAttr('disabled');
+        jQuery("#model").empty();
+        jQuery("#model").append("<option>Loading...</option>");
+        jQuery("#model").attr('disabled', 'disabled');
+        var jqxhr = jQuery.ajax(
+            "/Car/GetModelsFromYearMake/" + jQuery(".year").val() + "/" + m)
+            .done(function (data) {
+                jQuery("#model").removeAttr('disabled');
+                jQuery("#model").empty();
+                jQuery("#model").append("<option>Select Model</option>");
+                jQuery.each(data, function (i, val) {
+                    jQuery("#model").append("<option>" + val + "</option>");
+                });
+            })
+            .fail(function () {
+                alert("error");
+            })
+            .always(function () {
+                //alert( "complete" );
+            });
+    }
+
+    function goToVehicle(v) {
+
+        var make = jQuery("#make option:selected").text();
+        var year = jQuery("#year").val();
+        //alert(year);
+        //alert(make);
+        //alert(v);
+        window.open("/Car/Lookup/" + year + "/" + make + "/" + v, "_self")
+    }
+
+
+</script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+@{
+
+    bool isMobile = false;
+    string u = Request.ServerVariables["HTTP_USER_AGENT"];
+    System.Text.RegularExpressions.Regex b = new System.Text.RegularExpressions.Regex(@"(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino", System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Multiline);
+    System.Text.RegularExpressions.Regex v = new System.Text.RegularExpressions.Regex(@"1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-", System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Multiline);
+    if ((b.IsMatch(u) || v.IsMatch(u.Substring(0, 4))))
+    {
+        isMobile = true;
+    }
+
+    var totalPts = "";
+    int totalPtsInt = 0;
+    string canvasVisible = "";
+    string selectVisible = "";
+    string yearmakemodelText = "";
+    string forumURL = "";
+
+
+    if (ViewBag != null)
+    {
+        if (ViewBag.WTFC != null)
+        {
+            totalPts = ViewBag.WTFC.Totalpts;
+            totalPtsInt = Convert.ToInt32(totalPts);
+            selectVisible = "display:none";
+        }
+        else
+        {
+            yearmakemodelText = "Lookup Vehicle";
+            canvasVisible = "display:none";
+            selectVisible = "display:block";
+        }
+    }
+    else
+    {
+        yearmakemodelText = "Lookup Vehicle";
+        canvasVisible = "display:none";
+        selectVisible = "display:block";
+    }
+
+
+    string message = "";
+    string color = "";
+    string enginePoints = "";
+    string electricalPoints = "";
+    string airBagPoints = "";
+    string powerTrainPoints = "";
+    string otherPoints = "";
+    string averageEnginePoints = "";
+    string averageElectricalPoints = "";
+    string averageAirBagPoints = "";
+    string averagePowerTrainPoints = "";
+    string averageOtherPoints = "";
+    string complaintCount = "";
+    string problemRatio = "";
+
+    Decimal averageEnginePointsInt = 0;
+    Decimal averageElectricalPointsInt = 0;
+    Decimal averageAirBagPointsInt = 0;
+    Decimal averagePowerTrainPointsInt = 0;
+    Decimal averageOtherPointsInt = 0;
+
+    Decimal enginePointsInt = 0;
+    Decimal electricalPointsInt = 0;
+    Decimal airBagPointsInt = 0;
+    Decimal powerTrainPointsInt = 0;
+    Decimal otherPointsInt = 0;
+
+    Decimal complaintCountInt = 0;
+    Decimal problemRatioInt = 0;
+
+    List<WordCloud> wordCloudList = new List<WordCloud>();
+
+    string totalSales = "";
+    string h2Text = "";
+
+    if (ViewBag != null && ViewBag.WTFC != null)
+    {
+        enginePoints = ViewBag.WTFC.EnginePts;
+        electricalPoints = ViewBag.WTFC.ElectricalPts;
+        airBagPoints = ViewBag.WTFC.AirbagPts;
+        powerTrainPoints = ViewBag.WTFC.PowertrainPts;
+        otherPoints = ViewBag.WTFC.OtherComplaints;
+        totalSales = ViewBag.WTFC.Totalsales;
+
+        averageEnginePoints = ViewBag.WTFC.AverageEnginePts;
+        averageElectricalPoints = ViewBag.WTFC.AverageElectricalPts;
+        averageAirBagPoints = ViewBag.WTFC.AverageAirbagPts;
+        averagePowerTrainPoints = ViewBag.WTFC.AveragePowertrainPts;
+        averageOtherPoints = ViewBag.WTFC.AverageOtherComplaints;
+
+        complaintCount = ViewBag.WTFC.ComplaintCount;
+        problemRatio = ViewBag.WTFC.ProblemRatio;
+        wordCloudList = ViewBag.WTFC.WordCloudList;
+
+        forumURL = ViewBag.WTFC.ForumURL;
+
+        if (enginePoints != null)
+        {
+            enginePointsInt = Convert.ToInt32(enginePoints);
+        }
+        if (electricalPoints != null)
+        {
+            electricalPointsInt = Convert.ToInt32(electricalPoints);
+        }
+
+        if (airBagPoints != null)
+        {
+            airBagPointsInt = Convert.ToInt32(airBagPoints);
+        }
+
+        if (powerTrainPoints != null)
+        {
+            powerTrainPointsInt = Convert.ToInt32(powerTrainPoints);
+
+        }
+        if (otherPoints != null)
+        {
+            otherPointsInt = Convert.ToInt32(otherPoints);
+
+        }
+
+
+        if (averageEnginePoints != null)
+        {
+            averageEnginePointsInt = Convert.ToInt32(averageEnginePoints);
+        }
+        else
+        {
+            averageEnginePointsInt = 0;
+            averageEnginePoints = "0";
+        }
+        if (averageElectricalPoints != null)
+        {
+            averageElectricalPointsInt = Convert.ToInt32(averageElectricalPoints);
+        }
+        else
+        {
+            averageElectricalPointsInt = 0;
+            averageElectricalPoints = "0";
+        }
+
+        if (averagePowerTrainPoints != null)
+        {
+            averagePowerTrainPointsInt = Convert.ToInt32(averagePowerTrainPoints);
+        }
+        else
+        {
+            averagePowerTrainPointsInt = 0;
+            averagePowerTrainPoints = "0";
+        }
+
+
+        if (averageAirBagPoints != null)
+        {
+            averageAirBagPointsInt = Convert.ToInt32(averageAirBagPoints);
+        }
+        else
+        {
+            averageAirBagPointsInt = 0;
+            averageAirBagPoints = "0";
+        }
+
+        if (averageOtherPoints != null)
+        {
+            averageOtherPointsInt = Convert.ToInt32(averageOtherPoints);
+        }
+        else
+        {
+            averageOtherPointsInt = 0;
+            averageOtherPoints = "0";
+        }
+
+
+        totalPtsInt = Convert.ToInt32(enginePointsInt + electricalPointsInt + airBagPointsInt + powerTrainPointsInt + otherPointsInt);
+
+
+        if (complaintCount != null)
+        {
+            complaintCountInt = Convert.ToInt32(complaintCount);
+        }
+
+        if (problemRatio != null)
+        {
+            problemRatioInt = Convert.ToInt32(problemRatio);
+        }
+
+
+
+        h2Text = "WTF Points";
+    }
+    else
+    {
+        h2Text = "Lookup Vehicle";
+    }
+
+}
+
+
+
+
+
+<div class="jumbotron">
+    <h1>@yearmakemodelText @ViewBag.Year @ViewBag.Make @ViewBag.Model</h1>
+</div>
+
+<div class="row">
+
+
+    <div class="col-md-12">
+        <div style="text-align:center; width:100%;">
+            <h2>@h2Text</h2>
+        </div>
+
+
+        <form>
+            <div class="form-group col-md-12" style="@selectVisible">
+                <select id="year" class="year form-control" onchange="changeMake(this.value)">
+                    <option>Select Year</option>
+                    <option>2019</option>
+                    <option>2018</option>
+                    <option>2017</option>
+                    <option>2016</option>
+                    <option>2015</option>
+                    <option>2014</option>
+                    <option>2013</option>
+                    <option>2012</option>
+                    <option>2011</option>
+                    <option>2010</option>
+                    <option>2009</option>
+                    <option>2008</option>
+                    <option>2007</option>
+                    <option>2006</option>
+                    <option>2005</option>
+                    <option>2004</option>
+                    <option>2003</option>
+                    <option>2002</option>
+                    <option>2001</option>
+                    <option>2000</option>
+                    <option>1999</option>
+                </select>
+                <br />
+
+                <div class="form-group">
+                    <div id="loadingMakeSpan" style="display:none">
+                        <button id="loadingMake" class="btn btn-sm btn-success btn-block">
+                            <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate" /> Loading...
+                        </button>
+                        <br />
+                    </div>
+                    <select id="make" class="form-control" onchange="changeModel(this.value)">
+                        <option>Select Make</option>
+                    </select>
+
+                    <br />
+                    <div id="loadingModelSpan" style="display:none">
+                        <button id="loadingModel" class="btn btn-sm btn-success btn-block">
+                            <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate" /> Loading...
+                        </button>
+                        <br />
+                    </div>
+                    <select class="form-control" id="model" onchange="goToVehicle(this.value)">
+                        <option>Select Model</option>
+                    </select>
+                </div>
+
+            </div>
+        </form>
+
+
+        <script src="/Scripts/gauge.js"></script>
+        <div id="canvas-container" style="text-align:center; width:100%; @canvasVisible">
+            <canvas id="wtfPoints" style="width:65%; text-align:center" />
+            <br />
+            <!-- change this -->
+            @{
+
+
+                if (totalPtsInt > 200)
+                {
+                    message = "<strong>WTF is going on?</strong><br /><br /><strong>WTF Points:</strong> " + totalPtsInt.ToString();
+                    color = "#CC0000";
+
+                }
+                else if (totalPtsInt > 118)
+                {
+                    message = "<strong>Definitely has problems!</strong><br /><br /><strong>WTF Points:</strong> " + totalPtsInt.ToString();
+                    color = "#FFA500";
+                }
+                else if (totalPtsInt > 75)
+                {
+                    message = "<strong>Proceed with caution!</strong><br /><br /><strong>WTF Points:</strong> " + totalPtsInt.ToString();
+                    color = "#FFC000";
+                }
+                else if (totalPtsInt > 35)
+                {
+                    message = "<strong>Keep an eye on it!</strong><br /><br /><strong>WTF Points:</strong> " + totalPtsInt.ToString();
+                    color = "#FFD700";
+                }
+                else
+                {
+                    message = "<strong>Not too bad!</strong><br /><br /><strong>WTF Points:</strong> " + totalPtsInt.ToString();
+                    color = "#12A849";
+                }
+            }
+
+
+
+
+        </div>
+
+        @if (ViewBag.WTFC != null)
+        {
+            @Html.Raw("<div style='text-align:center'>" + message + "</div>")
+            if (complaintCountInt > 0 && problemRatioInt > 0)
+            {
+                @Html.Raw("<div style='text-align:center'><strong>Total Complaints:</strong> " + complaintCountInt + " ");
+                @Html.Raw("<div style='text-align:center'><strong>Problem Ratio:</strong> 1 in " + problemRatioInt + " cars ");
+            }
+
+        }
+
+        <hr>
+
+        <script>
+            var opts = {
+                angle: -0.2, // The span of the gauge arc
+                lineWidth: 0.2, // The line thickness
+                radiusScale: 1, // Relative radius
+                pointer: {
+                    length: 0.7, // // Relative to gauge radius
+                    strokeWidth: 0.075, // The thickness
+                    color: '#000000' // Fill color
+                },
+                limitMax: false,     // If false, max value increases automatically if value > maxValue
+                limitMin: false,     // If true, the min value of the gauge will be fixed
+
+                //change this
+                colorStart: '#7EE081',   // Colors
+                colorStop: '@Html.Raw(color)',    // just experiment with them
+                strokeColor: '@Html.Raw(color)',  // to see which ones work best for you
+                generateGradient: true,
+                highDpiSupport: true,     // High resolution support
+
+            };
+            var target = document.getElementById('wtfPoints'); // your canvas element
+            var gauge = new Gauge(target).setOptions(opts); // create gauge
+            gauge.maxValue = 400; // set max gauge value
+            gauge.setMinValue(0);  // Prefer setter over gauge.minValue = 0
+            gauge.animationSpeed = 32; // set animation speed (32 is default value)
+
+            //change this
+            gauge.set(@totalPts); // set actual value
+
+        </script>
+
+
+
+        <script src="/Scripts/jquery.awesomeCloud-0.2.min.js"></script>
+        <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/datatables.min.js"></script>
+
+
+        <br /><br />
+
+        <div class="container" style="@canvasVisible">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h3 class="panel-title"><strong>WTF Points Breakdown</strong></h3>
+                            <span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-up"></i></span>
+                        </div>
+                        <div class="panel-body">
+
+
+                            <div style="@canvasVisible">
+
+                                <div style="text-align:center; width:100%">
+                                    <h3>Problems Summary</h3>
+                                </div>
+                                <canvas id="myChart" />
+                                <br />
+                                <br />
+                            </div>
+                            <script>
+								var ctx = document.getElementById("myChart").getContext('2d');
+								var myChart = new Chart(ctx, {
+									type: 'bar',
+									data: {
+										labels: ["Engine", "Power Train", "Electrical", "Air Bags", "Other"],
+										datasets: [
+
+
+											{
+
+												label: '@ViewBag.Year @ViewBag.Make @ViewBag.Model',
+												data: [@Html.Raw(enginePoints), @Html.Raw(powerTrainPoints), @Html.Raw(electricalPoints), @Html.Raw(airBagPoints), @Html.Raw(otherPoints)],
+								                backgroundColor: [
+									                'rgba(255, 99, 132, 0.9)',
+									                'rgba(54, 162, 235, 0.9)',
+									                'rgba(255, 200, 10, 0.9)',
+									                'rgba(255, 100, 255, 0.9)',
+									                'rgba(50, 255, 235, 0.9)'
+
+								                ],
+									                borderColor: [
+										                'rgba(255,99,132,0.7)',
+										                'rgba(54, 162, 235,0.7)'
+
+									                ],
+										            borderWidth: 1
+                                            },
+                                            {
+
+												label: 'Average Vehicle',
+												data: [@Html.Raw(averageEnginePoints), @Html.Raw(averagePowerTrainPoints), @Html.Raw(averageElectricalPoints), @Html.Raw(averageAirBagPoints), @Html.Raw(averageOtherPoints)],
+								                backgroundColor: [
+                                                    'rgba(128, 128, 128, 0.1)',
+                                                    'rgba(128, 128, 128, 0.1)',
+                                                    'rgba(128, 128, 128, 0.1)',
+                                                    'rgba(128, 128, 128, 0.1)',
+                                                    'rgba(128, 128, 128, 0.1)'
+
+								                ],
+									                borderColor: [
+										                'rgba(255,99,132,0.7)',
+										                'rgba(54, 162, 235,0.7)'
+
+									                ],
+                                                borderWidth: 1,
+                                                type: 'line'
+                                            }
+
+											]
+											},
+								options: {
+									responsive: true,
+									@{
+										if(isMobile==true){
+											@Html.Raw("aspectRatio: .95,");
+										}
+										else{
+											@Html.Raw("");
+										}
+
+									}
+
+									scales: {
+										xAxes: {
+											stacked: false
+										},
+										yAxes: [{
+											ticks: {
+												beginAtZero: true
+											},
+											stacked: false
+										}]
+									},
+									bevelWidth: 3,
+										bevelHighlightColor: 'rgba(255, 255, 255, 0.75)',
+											bevelShadowColor: 'rgba(0, 0, 0, 0.5)'
+								}
+										});
+
+
+
+								var myChartE = document.getElementById("myChart");
+								myChartE.onclick = (function (evt) {
+									var activePoints = myChart.getElementsAtEvent(evt);
+									if (activePoints[0]) {
+										var chartData = activePoints[0]['_chart'].config.data;
+										var idx = activePoints[0]['_index'];
+
+										var label = chartData.labels[idx];
+										var value = chartData.datasets[0].data[idx];
+
+
+										var labelarray = label.split(' ');
+
+										//gives us the current url
+										var href = window.location.href;
+
+										var hrefArr = href.split("/");
+										var carUrl = "";
+
+										for(var x=0;x<hrefArr.length;x++){
+											if(x > 4){
+											   if(carUrl == ""){
+												  carUrl = hrefArr[x];
+
+											   }
+												else{
+													if(hrefArr[x]!="Lookup"){
+														carUrl += "/" + hrefArr[x];
+													}
+												}
+
+											}
+										}
+
+										var preUrl = "";
+
+										for (var i = 0; i < labelarray.length; i++) {
+											if (i > labelarray.length - 4) {
+												if (labelarray[i] != "Issues") {
+													preUrl += labelarray[i];
+												}
+											}
+										}
+
+										window.open("/Car/Issues/" + preUrl + "/" + carUrl, "_self");
+
+									  }
+
+								});
+
+
+
+                            </script>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="container" style="@canvasVisible">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-success">
+                        <div class="panel-heading">
+                            <h3 class="panel-title"><strong>Most Common Complaint Words</strong></h3>
+                            <span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-up"></i></span>
+                        </div>
+                        <div class="panel-body">
+
+                            <ul class="nav nav-tabs">
+                                <li class="active"><a href="#WTFWords" class="tab-pane fade in active" data-toggle="tab">WTF Words</a></li>
+                                <li @{ if (isMobile) { @Html.Raw("style='display:none'") ; } }><a href="#WTFWordCloud" class="tab-pane fade in" data-toggle="tab">WTF Words - Visualization</a></li>
+                            </ul>
+
+                            <div class="tab-content">
+                                <br /><br />
+                                <div class="tab-pane active" id="WTFWords">
+
+                                    <table id="tblWordCloud" class="table table-striped table-bordered" style="width:100%">
+                                        <thead>
+                                            <tr>
+                                                <th>WTF Word</th>
+                                                <th>WTF Word Count</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+                                            @{
+
+                                                foreach (WordCloud wc in wordCloudList)
+                                                {
+
+                                                    @Html.Raw("<tr><td>" + wc.Word + "</td><td>" + wc.Weight + "</td></tr>");
+                                                }
+
+
+
+                                            }
+
+
+                                        </tbody>
+
+                                    </table>
+
+                                </div>
+                                <div @{ if (isMobile) { @Html.Raw("style='display:none'") ; } }
+                                     class="tab-pane" id="WTFWordCloud">
+
+                                    <div id="wordcloud2" class="wordcloud">
+
+                                        @{
+                                            int wcLargest = 0;
+                                            //decimal wcAvg = 0;
+                                            int maxWordWeight = 300;
+
+                                            if (wordCloudList.Count > 0)
+                                            {
+                                                foreach (WordCloud wc in wordCloudList)
+                                                {
+                                                    if (wcLargest < wc.Weight)
+                                                    {
+                                                        wcLargest = wc.Weight;
+                                                    }
+                                                }
+
+                                                if (wcLargest < maxWordWeight)
+                                                {
+                                                    wcLargest = maxWordWeight;
+                                                }
+
+                                                decimal wcDivider = (wcLargest / maxWordWeight);
+
+                                                foreach (WordCloud wc in wordCloudList)
+                                                {
+
+                                                    @Html.Raw("<span data-weight=\"" + Convert.ToInt32(wc.Weight / wcDivider) + "\">" + wc.Word + "</span>");
+
+                                                }
+                                            }
+
+
+                                        }
+
+                                    </div>
+
+                                </div>
+
+
+
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="panel panel-info">
+                        <div class="panel-heading">
+                            <h3 id="h3DiscussionForum" class="panel-title">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>Discussion Forum</strong></h3>
+                            <span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-up"></i></span>
+                        </div>
+                        <div class="panel-body">
+                            Having problems with this vehicle? Disagree with this car's rating? <br /><br />Discuss more in the
+                            @Html.Raw("<a href='" + forumURL + "'>" + ViewBag.Make + " Discussion Forum</a>")
+
+
+                        </div>
+
+                    </div>
+
+
+
+
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+
+    </div>
+
+    <script>
+        var settings = {
+            "size": {
+                "grid": 16
+            },
+            "options": {
+                "color": "random-dark",
+                "printMultiplier": 3
+            },
+            "font": "Futura, Helvetica, sans-serif",
+            "shape": "square"
+        };
+        (function ($) {
+            $(document).ready(function () {
+                $("#wordcloud2").awesomeCloud(settings);
+
+                $('#tblWordCloud').DataTable(
+                    {
+                        "order": [[1, "desc"]]
+                    }
+                );
+
+
+
+            });
+        }
+        )(jQuery);
+
+        jQuery(".nav-tabs a").click(function () {
+            //jQuery(this).tab('show');
+        });
+
+
+        jQuery(document).on('click', '.panel-heading span.clickable', function (e) {
+            var $this = jQuery(this);
+            if (!$this.hasClass('panel-collapsed')) {
+                $this.parents('.panel').find('.panel-body').slideUp();
+                $this.addClass('panel-collapsed');
+                $this.find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+                //$this.parents('.panel').find('.panel-body').attr('style','display:none');
+            } else {
+                $this.parents('.panel').find('.panel-body').slideDown();
+                $this.removeClass('panel-collapsed');
+                $this.attr('style', '');
+                $this.find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+            }
+        });
+
+        jQuery(document).on('click', '.panel-title', function (e) {
+            var $this = jQuery(this);
+            if (!$this.hasClass('panel-collapsed')) {
+                $this.parents('.panel').find('.panel-body').slideUp();
+                $this.parents('.panel').find('.panel-heading').addClass('panel-collapsed');
+                $this.parents('.panel').find('.panel-title').addClass('panel-collapsed');
+                $this.addClass('panel-collapsed');
+                $this.parents('.panel').find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+                //$this.parents('.panel').find('.panel-body').attr('style','display:none');
+            } else {
+                $this.parents('.panel').find('.panel-body').slideDown();
+                $this.parents('.panel').find('.panel-heading').removeClass('panel-collapsed');
+                $this.parents('.panel').find('.panel-title').removeClass('panel-collapsed');
+                $this.removeClass('panel-collapsed');
+                $this.attr('style', '');
+                $this.parents('.panel').find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+            }
+        });
+
+
+    </script>
+
+</div>

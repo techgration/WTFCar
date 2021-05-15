@@ -1,0 +1,111 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Car Problem Tracking Solution</title>
+	@Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+	@Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+    <script>
+        (adsbygoogle = window.adsbygoogle || []).push({
+            google_ad_client: "ca-pub-7622133928782202",
+            enable_page_level_ads: true
+        });
+    </script>
+    <script type="text/javascript">
+        function readMore(element) {
+            var el = document.getElementById(element);
+            if (el.classList.contains('complaintText')) {
+                el.classList.remove('complaintText');
+                el.classList.add('complaintTextShowAll');
+            }
+            else {
+                el.classList.add('complaintText');
+                el.classList.remove('complaintTextShowAll');
+            }
+
+
+        }
+    </script>
+
+
+  
+    <style>
+        .complaint {
+            border: 2px;
+            border-radius: 30px 15px 30px 15px;
+            background-color: #337ab7;
+            background-color: white;
+            box-shadow: 0 0 1px 1px black;
+            padding-top: 20px;
+            padding-bottom: 50px;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        .complaintText {
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+            .complaintText::first-letter {
+                text-transform: uppercase;
+            }
+
+        .complaintTextShowAll {
+        }
+
+            .complaintTextShowAll::first-letter {
+                text-transform: capitalize;
+            }
+    </style>
+</head>
+<body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                @Html.ActionLink("WTF Car", "Index", "", new { area = "" }, new { @class = "navbar-brand" })
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li>@Html.ActionLink("Home", "Index", "")</li>
+                    <li>@Html.ActionLink("Car Lookup", "Lookup", "Car")</li>
+                    <li class="nav-item dropdown" >
+						<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						  Worst Cars<span class="caret"></span>
+						</a>
+						<div class="dropdown-menu" aria-labelledby="navbarDropdown" style="background-color: #202020; padding:10px">
+						  <a class="dropdown-item" href="/Car/WorstCarsAllTime" style="color:#FFFFFF;white-space: nowrap;  display: inline-block;position: relative;z-index: 1; padding: 2em;margin: -2em;" >Worst Cars</a><br><br>
+						  <a  Class="dropdown-item" href="/Car/WorstCarMakes" style="color:#FFFFFF;white-space: nowrap;  display: inline-block;position: relative;z-index: 1; padding: 2em;margin: -2em;">Worst Makes - All Time</a><br><br>
+						   <a  class="dropdown-item" href="/Car/WorstCarMakesLastFiveYears" style="color:#FFFFFF;white-space: nowrap;  display: inline-block;position: relative;z-index: 1; padding: 2em;margin: -2em;">Worst Makes - Last 5 Years</a><br>
+						</div>
+					</li>
+                    <li><a href="http://forum.wtfcar.com">Forum</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - WTFCar.com</p>
+			<br />
+			<div>Icons made by <a href="https://www.freepik.com/" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" 			    title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" 			    title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
+        </footer>
+    </div>
+
+
+</body>
+</html>

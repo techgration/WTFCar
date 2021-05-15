@@ -1,0 +1,128 @@
+﻿
+<script type="text/javascript">
+    var currentUrl = window.location.href;
+    var currentUrlArr = currentUrl.split("/");
+    function getPage(p) {
+        var newurl = "";
+
+        //there is already a page number
+        if (currentUrlArr.length > 9) {
+            for (var i = 0; i < currentUrlArr.length; i++) {
+                if (i <= 8) {
+                    if (newurl == "") {
+                        newurl = currentUrlArr[i];
+                    }
+                    else {
+                        newurl += "/" + currentUrlArr[i];
+                    }
+                }
+
+            }
+            window.open((newurl + "/" + p), "_self");
+        }
+        //there is not a page number
+        else {
+            window.open((currentUrl + "/" + p), "_self");
+        }
+
+    }
+
+</script>
+
+
+<div class="jumbotron">
+    <h1>@ViewBag.Year @ViewBag.Make @ViewBag.Model</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div style="text-align:center; width:100%">
+            <h2>Issues - @ViewBag.Issue</h2>
+        </div>
+
+
+        @{
+           
+            WTFCar.Models.CarComments complaints = new WTFCar.Models.CarComments();
+
+            if (ViewBag != null && ViewBag.Complaints != null)
+            {
+                complaints = ViewBag.Complaints;
+            }
+
+            string message = "";
+            string color = "";
+            string enginePoints = "";
+            string electricalPoints = "";
+            string airBagPoints = "";
+            string powerTrainPoints = "";
+            string otherPoints = "";
+
+            int complaintCount = 0;
+            int totalComplaints = 0;
+        }
+
+
+
+        <br />
+        <!-- change this -->
+        @{
+            string divComplaints = "";
+            int complaintMultiplier = 0;
+            int pageNum = 1;
+            if (ViewBag.Page != null && Convert.ToInt32(ViewBag.Page) > 1)
+            {
+                pageNum = Convert.ToInt32(ViewBag.Page);
+                complaintMultiplier = ((pageNum - 1) * 20);
+            }
+            else
+            {
+                complaintMultiplier = 0;
+            }
+
+            WTFCar.Models.CarComments carComments = ViewBag.Complaints;
+            
+
+            foreach (WTFCar.Models.CarComment c in carComments.CarCommentsList)
+            {
+                divComplaints = divComplaints + "<div class='complaint'>" +
+                "<h3 class='card-title'>Complaint #" + (complaintMultiplier + complaintCount + 1) + "</h3><br /><div id='complaint" + complaintCount
+                + "' class='complaintText'>" + c.CarCommentText.ToLower() + "</div><br /><a onclick='readMore(\"complaint" + complaintCount +
+                "\")' class='btn btn-primary pull-right'>Read more</a></div><br /><br />";
+                complaintCount = complaintCount + 1;
+            }
+
+            if (ViewBag.ComplaintCount != null)
+            {
+                totalComplaints = Convert.ToInt32(ViewBag.ComplaintCount);
+            }
+
+
+        }
+
+        @Html.Raw(divComplaints);
+
+
+    </div>
+
+    <nav aria-label="labelaria">
+        <ul class="pagination pagination-lg">
+            @{
+                int pageCount = (totalComplaints / 20) + 1;
+
+                if (pageCount > 1)
+                {
+                    for (int x = 1; x < pageCount + 1; x++)
+                    {
+                        @Html.Raw("<li class='page-item'><a onclick='getPage(" + x + ")' class='page-link'>" + x + "</a></li>");
+                    }
+                }
+
+
+            }
+
+        </ul>
+    </nav>
+
+
+</div>

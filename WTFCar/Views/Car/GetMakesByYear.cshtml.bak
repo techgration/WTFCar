@@ -1,0 +1,12 @@
+﻿
+@{
+    List<string> makes = ViewBag.makes;
+    
+        foreach(string s in makes)
+        {
+            Html.Raw(s + "<br />");
+        }
+           
+    
+}
+

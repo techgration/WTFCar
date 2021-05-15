@@ -1,0 +1,22 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="jumbotron">
+    <h1>WTF Car News</h1>
+</div>
+
+<div class="row">
+    @if (ViewBag.RSSFeed != null)
+    {
+        foreach (var item in ViewBag.RSSFeed)
+        {
+            <div>
+                <div>@item.Title</div>
+                <div><a href="@item.Link">@item.Link</a></div>
+                <div>@item.Description</div>
+                <div>@item.PubDate</div>
+            </div>
+        }
+    }
+</div>

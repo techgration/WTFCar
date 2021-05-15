@@ -1,0 +1,174 @@
+﻿
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<div class="jumbotron">
+    <h1>Worst Cars Make/Model By Year</h1>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div style="text-align:center; width:100%">
+            <h2>WTF Points</h2>
+        </div>
+
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
+        <script type="text/javascript" src="../Scripts/chartjs-plugin-style.min.js"></script>
+
+        <canvas id="myChart" style="width:65%"></canvas>
+        <br /><br />
+
+              <script>
+            var ctx = document.getElementById("myChart").getContext('2d');
+            var myChart = new Chart(ctx, {
+                type: 'horizontalBar',
+                data: {
+                    @{
+                        var comma = ',';
+                        var count = 0;
+                        var space = ' ';
+
+                    }
+                    labels: [
+                        @foreach (var wtfc in ViewBag.WorstCars)
+                        {
+                            if (count > 0)
+                            {
+                                 @Html.Raw(',')@Html.Raw('"')@wtfc.year@Html.Raw(' ')@wtfc.make@Html.Raw(' ')@wtfc.model@Html.Raw('"')
+                            }
+                            else
+                            {
+                                @Html.Raw('"')@wtfc.year@Html.Raw(' ')@wtfc.make@Html.Raw(' ')@wtfc.model@Html.Raw('"')
+                            }
+
+                            count = count + 1;
+                        }
+                    ],
+                    datasets: [
+
+                        {
+
+                            data: [
+
+                                @foreach (var wtfc in ViewBag.WorstCars)
+                                {
+                                  @wtfc.Totalpts@comma
+                                }
+                            ],
+
+                            backgroundColor: [
+
+                                'rgba(230, 25, 75, 0.8)',
+                                'rgba(60, 180, 75, 0.8)',
+                                'rgba(255, 225, 25, 0.8)',
+                                'rgba(0, 130, 200, 0.8)',
+                                'rgba(245, 130, 48, 0.8)',
+                                'rgba(145, 30, 180, 0.8)',
+                                'rgba(70, 240, 240, 0.8)',
+                                'rgba(240, 50, 230, 0.8)',
+                                'rgba(210, 245, 60, 0.8)',
+                                'rgba(250, 190, 190, 0.8)',
+                                'rgba(0, 128, 128, 0.8)',
+                                'rgba(230, 190, 255, 0.8)',
+                                'rgba(170, 110, 40, 0.8)',
+                                'rgba(255, 250, 200, 0.8)',
+                                'rgba(128, 0, 0, 0.8)',
+                                'rgba(170, 255, 195, 0.8)',
+                                'rgba(128, 128, 0, 0.8)',
+                                'rgba(255, 215, 180, 0.8)',
+                                'rgba(0, 0, 0, 0.1)',
+                                'rgba(230, 25, 75, 0.8)',
+                                'rgba(60, 180, 75, 0.8)',
+                                'rgba(255, 225, 25, 0.8)',
+                                'rgba(0, 130, 200, 0.8)',
+                                'rgba(245, 130, 48, 0.8)',
+                                'rgba(145, 30, 180, 0.8)',
+
+
+                            ],
+                            borderColor: [
+                                'rgba(230, 25, 75, 0.9)',
+                                'rgba(60, 180, 75, 0.9)',
+                                'rgba(255, 225, 25, 0.9)',
+                                'rgba(0, 130, 200, 0.9)',
+                                'rgba(245, 130, 48, 0.9)',
+                                'rgba(145, 30, 180, 0.9)',
+                                'rgba(70, 240, 240, 0.9)',
+                                'rgba(240, 50, 230, 0.9)',
+                                'rgba(210, 245, 60, 0.9)',
+                                'rgba(250, 190, 190, 0.9)',
+                                'rgba(0, 128, 128, 0.9)',
+                                'rgba(230, 190, 255, 0.9)',
+                                'rgba(170, 110, 40, 0.9)',
+                                'rgba(255, 250, 200, 0.9)',
+                                'rgba(128, 0, 0, 0.9)',
+                                'rgba(170, 255, 195, 0.9)',
+                                'rgba(128, 128, 0, 0.9)',
+                                'rgba(255, 215, 180, 0.9)',
+                                'rgba(0, 0, 0, 0.1)',
+                                'rgba(230, 25, 75, 0.9)',
+                                'rgba(60, 180, 75, 0.9)',
+                                'rgba(255, 225, 25, 0.9)',
+                                'rgba(0, 130, 200, 0.9)',
+                                'rgba(245, 130, 48, 0.9)',
+                                'rgba(145, 30, 180, 0.9)',
+
+                            ],
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        xAxes: {
+                            stacked: false
+                        },
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            },
+                            stacked: false
+                        }]
+                    },
+                    bevelWidth: 3,
+                    bevelHighlightColor: 'rgba(255, 255, 255, 0.75)',
+                    bevelShadowColor: 'rgba(0, 0, 0, 0.7)'
+                }
+            });
+
+
+
+
+                  var myChartE = document.getElementById("myChart");
+				  //myChartE.addEventListener("resize", resized());
+                  myChartE.onclick = (function (evt) {
+                      var activePoints = myChart.getElementsAtEvent(evt);
+                      if (activePoints[0]) {
+                          var chartData = activePoints[0]['_chart'].config.data;
+                          var idx = activePoints[0]['_index'];
+
+                          var label = chartData.labels[idx];
+                          var value = chartData.datasets[0].data[idx];
+
+
+                          var labelarray = label.split(' ');
+
+                          if (labelarray.length == 3) {
+                              window.open("/../../Car/Lookup/" + labelarray[0] + "/" + labelarray[1] + "/" + labelarray[2], "_self")
+                          }
+                          else {
+                              window.open("/../../Car/Lookup/" + labelarray[0] + "/" + labelarray[1] + "/" + labelarray[2] + "%20" + labelarray[3], "_self")
+                          }
+                         
+                      };
+
+				  });
+
+
+
+
+              </script>
+
+
+
+    </div>
+
+</div>

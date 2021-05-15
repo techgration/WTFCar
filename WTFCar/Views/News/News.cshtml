@@ -1,0 +1,48 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="jumbotron">
+    <h1>WTF Car News</h1>
+</div>
+
+<div class="row">
+    <h3><u>Latest Vehicle News</u></h3>
+</div>
+
+@if (ViewBag.RSSFeed != null)
+{
+    foreach (var item in ViewBag.RSSFeed)
+    {
+        <div class="row">
+
+            <div>
+                <div><h5><a target="_blank" href="@item.Link">@item.Title</a></h5></div>
+                <div>@item.Description</div>
+                <div>Published: @item.PubDate</div>
+            </div>
+
+        </div>
+    }
+}
+
+<br /><br />
+
+<div class="row">
+    <h3><u>Latest Vehicles Recalls</u></h3>
+</div>
+
+@if (ViewBag.RSSFeed2 != null)
+{
+    foreach (var item in ViewBag.RSSFeed2)
+    {
+        <div class="row">
+
+            <div>
+                <div><h5><a target="_blank"  href="@item.Link">@item.Title</a></h5></div>
+                <div>@item.Description</div>
+            </div>
+
+        </div>
+    }
+}

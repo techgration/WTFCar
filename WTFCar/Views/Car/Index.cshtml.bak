@@ -1,0 +1,29 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="jumbotron">
+    <h1>WTF Car</h1>
+    <p class="lead">WTF Car is a unique rating system which provides a unique insight for existing car owners and propspective car buyers</p>
+    <p><a href="/Car/Lookup" class="btn btn-primary btn-lg">Car Lookup &raquo;</a></p>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <h2>Lookup Car</h2>
+        <p>
+            Lookup your car by year, make, and model!
+        </p>
+        <p><a class="btn btn-default" href="/Car/Lookup">Learn more &raquo;</a></p>
+    </div>
+    <div class="col-md-4">
+        <h2>Find Worst Makes</h2>
+        <p>Not all car brands are the same! Take a look at the worst car makes/brands over the past 30 years</p>
+        <p><a class="btn btn-default" href="/Car/WorstCarMakes">Worst Car Makes/Brands</a></p>
+    </div>
+    <div class="col-md-4">
+        <h2>Discuss In Our Forums</h2>
+        <p>Disagree with our numbers? Need to find a fix? Discuss in our forums</p>
+        <p><a class="btn btn-default" href="http://forum.wtfcar.com/">WTF Car Forums</a></p>
+    </div>
+</div>
